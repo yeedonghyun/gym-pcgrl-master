@@ -45,7 +45,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     exp_name = get_exp_name(game, representation, experiment, **kwargs)
     resume = kwargs.get('resume', False)
     start_time = datetime.now().replace(microsecond=0)
-
+    
     if representation == 'wide':
         policy = FullyConvPolicyBigMap
         if game == "sokoban":
