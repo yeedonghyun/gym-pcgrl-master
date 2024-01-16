@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: gym-pcgrl
+Version: 0.4.0
+Summary: A package for "Procedural Content Generation via Reinforcement Learning" OpenAI Gym interface.
+Home-page: https://github.com/amidos2006/gym-pcgrl
+Author: Ahmed Khalifa
+Author-email: ahmed@akhalifa.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
