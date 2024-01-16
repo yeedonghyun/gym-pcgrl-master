@@ -41,9 +41,14 @@ def infer(game, representation, model_path, **kwargs):
                 success_cnt += 1
                 break
     
-    print(success_cnt)
+    print("----------------------------------------------------") 
+    print("Success cnt  : ", success_cnt) 
+    print("----------------------------------------------------") 
     end_time = datetime.now().replace(microsecond=0)
-    print("Total training time  : ", end_time - start_time)
+    print("Start time  : ", start_time)
+    print("End time  : ", end_time)
+    print("Total inference time  : ", end_time - start_time)
+    print("----------------------------------------------------") 
 
 ################################## MAIN ########################################
 game = 'match3'
