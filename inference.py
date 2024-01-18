@@ -30,7 +30,6 @@ def infer(game, representation, model_path, **kwargs):
     env = make_vec_envs(env_name, representation, None, 1, **kwargs)
     obs = env.reset()
 
-    success_cnt = 0
     for i in range(kwargs.get('trials', 1)):
         for _ in range(500):
             action, _ = agent.predict(obs)
@@ -38,11 +37,8 @@ def infer(game, representation, model_path, **kwargs):
             if kwargs.get('verbose', False):
                 print(info[0])
             if dones:
-                success_cnt += 1
                 break
     
-    print("----------------------------------------------------") 
-    print("Success cnt  : ", success_cnt) 
     print("----------------------------------------------------") 
     end_time = datetime.now().replace(microsecond=0)
     print("Start time  : ", start_time)
@@ -51,9 +47,9 @@ def infer(game, representation, model_path, **kwargs):
     print("----------------------------------------------------") 
 
 ################################## MAIN ########################################
-game = 'match3'
+game = 'maze'
 representation = 'wide'
-model_path = 'models/{}/{}/model_1.pkl'.format(game, representation)
+model_path = 'models/{}/{}/model.pkl'.format(game, representation)
 kwargs = {
     'change_percentage': 0.4,
     'trials': 1000,
