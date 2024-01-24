@@ -16,7 +16,7 @@ class MazeProblem(Problem):
         self._target_crossroads = 25
 
         self._rewards = {
-            "crossroads": 1,
+            "crossroads": 2,
             "players": 3,
             "goals": 3,
             "regions": 5
@@ -36,7 +36,7 @@ class MazeProblem(Problem):
             "goals": calc_certain_tile(map_locations, ["goal"]),
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
-        if map_stats["players"] != 1 or map_stats["goals"] != 1 :
+        if map_stats["players"] != 1 or map_stats["goals"] != 1: #or map_stats["regions"] != 1:
             return map_stats
 
         #BFS
@@ -100,13 +100,13 @@ class MazeProblem(Problem):
             "crossroads": new_stats["crossroads"], 
             "players": new_stats["players"],
             "goals": new_stats["goals"],
-            "regions": new_stats["regions"], 
+            "regions": new_stats["regions"]
         }
     
     def __move_pos(self, start, dir, visited, map):
         pos = copy.deepcopy(start)
 
-        while not self.__out_of_range(pos + dir) and map[pos[1]][pos[0]] != "solid":
+        while not self.__out_of_range(pos + dir) and map[pos[1]+ dir[1]][pos[0] + + dir[0]] != "solid":
             pos += dir
 
         if visited[pos[1]][pos[0]]:

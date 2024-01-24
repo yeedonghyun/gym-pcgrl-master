@@ -140,7 +140,8 @@ class PcgrlEnv(gym.Env):
         observation = self._rep.get_observation()
         observation["heatmap"] = self._heatmap.copy()
         reward = self._prob.get_reward(self._rep_stats, old_stats)
-        done = self._prob.get_episode_over(self._rep_stats,old_stats) or self._changes >= self._max_changes or self._iteration >= self._max_iterations
+        done = self._prob.get_episode_over(self._rep_stats,old_stats)
+        #done = self._prob.get_episode_over(self._rep_stats,old_stats) or self._changes >= self._max_changes or self._iteration >= self._max_iterations
         info = self._prob.get_debug_info(self._rep_stats,old_stats)
         info["iterations"] = self._iteration
         info["changes"] = self._changes

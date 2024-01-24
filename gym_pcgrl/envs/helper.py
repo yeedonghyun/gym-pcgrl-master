@@ -2,6 +2,8 @@
 A helper module that can be used by all problems
 """
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 
 """
 Public function to get a dictionary of all location of all tiles
@@ -374,3 +376,32 @@ def get_range_reward(new_value, old_value, low, high):
         return high - new_value + old_value - low
     if new_value < low and old_value > high:
         return high - old_value + new_value - low
+
+def save_image(map, output_path, arction_dim):
+    rows = len(map)
+    cols = len(map[0])
+    color_per_type = []
+    a = np.random.rand(3)
+    for i in range(arction_dim):
+        if i == 0:
+            color_per_type.append(to_rgba(np.array([1, 1, 1])))
+        elif i == 1:
+            color_per_type.append(to_rgba(np.array([0, 0, 0])))
+        elif i == 2:
+            color_per_type.append(to_rgba(np.array([0, 1, 0])))
+        else :
+            color_per_type.append(to_rgba(np.array([1, 0, 0])))
+
+    colored_list = []
+    for i in range(rows):
+        row = []
+        for j in range(cols):
+            color = color_per_type[map[i][j]]
+            row.append(color)
+            
+        colored_list.append(row)
+
+    plt.imshow(colored_list, cmap='viridis') 
+    plt.axis('off')  
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+    plt.close()

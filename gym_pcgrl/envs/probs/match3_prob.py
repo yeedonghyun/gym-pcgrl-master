@@ -25,18 +25,18 @@ class Match3Problem(Problem):
         
         self._rewards = {
             "swap_potential": 1,
-            "regions": 5,
+            #"regions": 50,
         }
 
     def get_tile_types(self):
         return ["empty", "solid"]
 
     def get_stats(self, map):
-        map_locations = get_tile_locations(map, self.get_tile_types())
+        #map_locations = get_tile_locations(map, self.get_tile_types())
 
         map_stats = {
             "swap_potential": 0,
-            "regions": calc_num_regions(map, map_locations, ["empty"]),
+            #"regions": calc_num_regions(map, map_locations, ["empty"]),
         }
 
         for x in range(self._width):
@@ -50,13 +50,13 @@ class Match3Problem(Problem):
                             for d in self.candidate_dir[i] :
                                 candidate_cell = self.Pos(x + d.x, y + d.y)
 
-                                if  self.isvalid_cell(candidate_cell, map):
+                                if self.isvalid_cell(candidate_cell, map):
                                     map_stats["swap_potential"] += 1
 
         return map_stats
     
     def isvalid_cell(self, pos, map):
-        if  pos.x < 0 or pos.x >= self._width or pos.y < 0 or pos.y >= self._height or map[pos.y][pos.x] == 1:
+        if  pos.x < 0 or pos.x >= self._width or pos.y < 0 or pos.y >= self._height or map[pos.y][pos.x] == "solid":
             return False
         
         return True
@@ -64,17 +64,17 @@ class Match3Problem(Problem):
     def get_reward(self, new_stats, old_stats):
         rewards = {
             "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._target_swap_potential - 10, self._target_swap_potential + 10),
-            "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
+            #"regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }
         #calculate the total reward
-        return rewards["swap_potential"] * self._rewards["swap_potential"] +\
-            rewards["regions"] * self._rewards["regions"] 
+        return rewards["swap_potential"] * self._rewards["swap_potential"] #+\
+            #rewards["regions"] * self._rewards["regions"] 
 
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["swap_potential"] >= self._target_swap_potential - 10 and new_stats["swap_potential"] <= self._target_swap_potential + 10 and new_stats["regions"] == 1
+        return new_stats["swap_potential"] >= self._target_swap_potential - 10 and new_stats["swap_potential"] <= self._target_swap_potential + 10 #and new_stats["regions"] == 1
 
     def get_debug_info(self, new_stats, old_stats):
         return {
             "swap_potential": new_stats["swap_potential"], 
-            "regions": new_stats["regions"], 
+            #"regions": new_stats["regions"], 
         }
