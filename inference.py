@@ -33,7 +33,7 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
 
     for i in range(kwargs.get('trials', 1)):
         obs = env.reset()
-        while(1) :
+        for _ in range(100) :
             action, _ = agent.predict(obs)
             obs, _, dones, info = env.step(action)
             if kwargs.get('verbose', False):
@@ -46,9 +46,9 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
             for b in o :
                 old = [np.where(r==1)[0][0] for r in b]
                 test.append(old)
-        #print(info[0])
-        path = output_file_path + str(i) + '_' + str(info[0]['swap_potential'])
-        save_image(test, path, 2)
+                
+        path = output_file_path + str(i) + '_' + str(info[0]['crossroads'])
+        save_image(test, path, 4)
     
     print("----------------------------------------------------") 
     end_time = datetime.now().replace(microsecond=0)
@@ -58,7 +58,7 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
     print("----------------------------------------------------") 
 
 ################################## MAIN ########################################
-game = 'match3'
+game = 'maze'
 representation = 'wide'
 model_path = 'models/{}/{}/model.pkl'.format(game, representation)
 output_file_path = 'image/{}/'.format(game)

@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from model import FullyConvPolicyBigMap
-from utils import get_exp_name, max_exp_idx, load_model, make_vec_envs
+from utils import get_exp_name, max_exp_idx, make_vec_envs
 from stable_baselines import PPO2
 from stable_baselines.results_plotter import load_results, ts2xy
 from datetime import datetime
@@ -16,6 +16,7 @@ def callback(_locals, _globals):
     :param _locals: (dict)
     :param _globals: (dict)
     """
+    
     global n_steps, best_mean_reward
     # Print stats every 1000 calls
     if (n_steps + 1) % 10 == 0:
@@ -74,7 +75,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 100000000
+steps = 50000000
 render = False
 logging = True
 n_cpu = 20

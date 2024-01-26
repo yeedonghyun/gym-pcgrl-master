@@ -36,7 +36,7 @@ class MazeProblem(Problem):
             "goals": calc_certain_tile(map_locations, ["goal"]),
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
-        if map_stats["players"] != 1 or map_stats["goals"] != 1: #or map_stats["regions"] != 1:
+        if map_stats["players"] != 1 or map_stats["goals"] != 1:
             return map_stats
 
         #BFS

@@ -378,10 +378,10 @@ def get_range_reward(new_value, old_value, low, high):
         return high - old_value + new_value - low
 
 def save_image(map, output_path, arction_dim):
-    rows = len(map)
-    cols = len(map[0])
+    height = len(map)
+    width = len(map[0])
     color_per_type = []
-    a = np.random.rand(3)
+
     for i in range(arction_dim):
         if i == 0:
             color_per_type.append(to_rgba(np.array([1, 1, 1])))
@@ -393,10 +393,10 @@ def save_image(map, output_path, arction_dim):
             color_per_type.append(to_rgba(np.array([1, 0, 0])))
 
     colored_list = []
-    for i in range(rows):
+    for y in range(height):
         row = []
-        for j in range(cols):
-            color = color_per_type[map[i][j]]
+        for x in range(width):
+            color = color_per_type[map[y][x]]
             row.append(color)
             
         colored_list.append(row)
@@ -405,3 +405,16 @@ def save_image(map, output_path, arction_dim):
     plt.axis('off')  
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.close()
+
+def isall_cells_have_spawn_routs(map):
+    height = len(map)
+    width = len(map[0])
+
+    for y in range(height-1, -1, -1):
+        for x in range(width-1, -1, -1):
+            
+
+            
+            return False
+
+    return True

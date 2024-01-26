@@ -1,5 +1,5 @@
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num_regions
+from gym_pcgrl.envs.helper import get_range_reward, isall_cells_have_spawn_routs
 
 class Match3Problem(Problem):
     class Pos():
@@ -25,19 +25,21 @@ class Match3Problem(Problem):
         
         self._rewards = {
             "swap_potential": 1,
-            #"regions": 50,
+            "spawn_route": 50,
         }
 
     def get_tile_types(self):
         return ["empty", "solid"]
 
     def get_stats(self, map):
-        #map_locations = get_tile_locations(map, self.get_tile_types())
 
         map_stats = {
             "swap_potential": 0,
-            #"regions": calc_num_regions(map, map_locations, ["empty"]),
+            "spawn_route": isall_cells_have_spawn_routs(map)
         }
+
+        if not map_stats["spawn_route"] :
+            return map_stats
 
         for x in range(self._width):
             for y in range(self._height):
