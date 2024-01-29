@@ -24,6 +24,8 @@ class MazeProblem(Problem):
 
         self.dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
 
+        self.step = 0
+
     def get_tile_types(self):
         return ["empty", "solid", "player", "goal"]
 
@@ -76,12 +78,14 @@ class MazeProblem(Problem):
                     visited[pos[1]][pos[0]] = True
 
             Q = temp_Q
+        self.step += 1
 
         return map_stats
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._target_crossroads, self._target_crossroads),
+            #"crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._target_crossroads, self._target_crossroads),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
@@ -93,7 +97,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
 
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] == self._target_crossroads and new_stats["regions"] == 1 and new_stats["players"] == 1 and new_stats["goals"] == 1
+        return new_stats["crossroads"] == self._target_crossroads and new_stats["regions"] == 1 and new_stats["players"] == 1 and new_stats["goals"] == 1 and self.step % 1000
 
     def get_debug_info(self, new_stats, old_stats):
         return {
@@ -106,7 +110,7 @@ class MazeProblem(Problem):
     def __move_pos(self, start, dir, visited, map):
         pos = copy.deepcopy(start)
 
-        while not self.__out_of_range(pos + dir) and map[pos[1]+ dir[1]][pos[0] + + dir[0]] != "solid":
+        while not self.__out_of_range(pos + dir) and map[pos[1]+ dir[1]][pos[0] + dir[0]] != "solid":
             pos += dir
 
         if visited[pos[1]][pos[0]]:

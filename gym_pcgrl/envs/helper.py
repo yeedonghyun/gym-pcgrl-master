@@ -373,9 +373,9 @@ def get_range_reward(new_value, old_value, low, high):
     if old_value >= low and new_value >= low:
         return max(old_value,high) - max(new_value,high)
     if new_value > high and old_value < low:
-        return high - new_value + old_value - low
+        return new_value - high + old_value - low
     if new_value < low and old_value > high:
-        return high - old_value + new_value - low
+        return high - old_value + low - new_value
 
 def save_image(map, output_path, arction_dim):
     height = len(map)
@@ -406,15 +406,33 @@ def save_image(map, output_path, arction_dim):
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.close()
 
-def isall_cells_have_spawn_routs(map):
+def is_all_cells_have_spawn_routes(map):
     height = len(map)
     width = len(map[0])
+    visited = [[False] * width for _ in range(height)]
 
-    for y in range(height-1, -1, -1):
-        for x in range(width-1, -1, -1):
-            
+    def connected_cells(y, x, moved_x):
+        if y < 0 or y >= height or x < 0 or x >= width:
+            return 
 
-            
-            return False
+        if visited[y][x] or map[y][x] == 1:
+            return 
+
+        visited[y][x] = True
+
+        connected_cells(y-1, x, False)
+        connected_cells(y+1, x, False)
+
+        if not moved_x:
+            connected_cells(y, x-1, True)
+            connected_cells(y, x+1, True)
+
+    for x in range(width):
+        connected_cells(0, x, False)
+
+    for y in range(height):
+        for x in range(width):
+            if not visited[y][x] and map[y][x] == 0:
+                return False
 
     return True

@@ -1,5 +1,5 @@
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_range_reward, isall_cells_have_spawn_routs
+from gym_pcgrl.envs.helper import get_range_reward, is_all_cells_have_spawn_routes
 
 class Match3Problem(Problem):
     class Pos():
@@ -35,7 +35,7 @@ class Match3Problem(Problem):
 
         map_stats = {
             "swap_potential": 0,
-            "spawn_route": isall_cells_have_spawn_routs(map)
+            "spawn_route": is_all_cells_have_spawn_routes(map)
         }
 
         if not map_stats["spawn_route"] :
@@ -66,17 +66,14 @@ class Match3Problem(Problem):
     def get_reward(self, new_stats, old_stats):
         rewards = {
             "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._target_swap_potential - 10, self._target_swap_potential + 10),
-            #"regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }
         #calculate the total reward
-        return rewards["swap_potential"] * self._rewards["swap_potential"] #+\
-            #rewards["regions"] * self._rewards["regions"] 
+        return rewards["swap_potential"] * self._rewards["swap_potential"] 
 
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["swap_potential"] >= self._target_swap_potential - 10 and new_stats["swap_potential"] <= self._target_swap_potential + 10 #and new_stats["regions"] == 1
+        return new_stats["swap_potential"] >= self._target_swap_potential - 10 and new_stats["swap_potential"] <= self._target_swap_potential + 10
 
     def get_debug_info(self, new_stats, old_stats):
         return {
-            "swap_potential": new_stats["swap_potential"], 
-            #"regions": new_stats["regions"], 
+            "swap_potential": new_stats["swap_potential"]
         }

@@ -38,23 +38,53 @@ class YourClass:
         obs[self.name] = old
         return obs
 
+def is_all_cells_have_spawn_routes(map):
+    height = len(map)
+    width = len(map[0])
+    visited = [[False] * width for _ in range(height)]
+
+    def connected_cells(y, x, moved_x):
+        if y < 0 or y >= height or x < 0 or x >= width:
+            return 
+
+        if visited[y][x] or map[y][x] == 1:
+            return 
+
+        visited[y][x] = True
+
+        connected_cells(y-1, x)
+        connected_cells(y+1, x)
+
+        if not moved_x:
+            connected_cells(y, x-1)
+            connected_cells(y, x+1)
+
+    for x in range(width):
+        connected_cells(0, x, False)
+
+    for y in range(height):
+        for x in range(width):
+            if not visited[y][x] and map[y][x] == 0:
+                return False
+
+    return True
+
 
 def main(game):
     _width = 11
     _height = 7
-    _prob = {"empty": 0.6, "solid":0.36, "player":0.02, "goal":0.02}    
+    _prob = {"empty": 0.6, "solid":0.4}    
     map = generate_random_list(_width, _height, _prob)
 
-    random_list = []
+    example_board = [
+        [0, 1, 0, 0],
+        [1, 1, 1, 0],
+        [0, 1, 0, 1],
+        [1, 1, 1, 1]
+    ]
 
-    for i in range(_height):
-        row = []
-        for j in range(_width):
-            element = random.
-            row.append(element)
-
-        random_list.append(row)
-
+    result = is_all_cells_have_spawn_routes(example_board)
+    print(result)
 
 game = 'maze'
 

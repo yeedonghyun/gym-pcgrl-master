@@ -16,7 +16,7 @@ def callback(_locals, _globals):
     :param _locals: (dict)
     :param _globals: (dict)
     """
-    
+
     global n_steps, best_mean_reward
     # Print stats every 1000 calls
     if (n_steps + 1) % 10 == 0:
@@ -75,7 +75,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 50000000
+steps = 30000000
 render = False
 logging = True
 n_cpu = 20
