@@ -28,8 +28,8 @@ def callback(_locals, _globals):
             print(x[-1], 'timesteps')
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
 
-            # New best model, we save the agent here
-            _locals['self'].save(os.path.join(log_dir, 'model.pkl'))
+            if (n_steps + 1) % 1000000 == 0:
+                _locals['self'].save(os.path.join(log_dir, str(n_steps) + 'model.pkl'))
         else:
             print('{} monitor entries'.format(len(x)))
             pass
@@ -41,7 +41,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     env_name = '{}-{}-v0'.format(game, representation)
     exp_name = get_exp_name(game, representation, experiment, **kwargs)
     resume = kwargs.get('resume', False)
-    start_time = datetime.now().replace(microsecond=0)
+    start_time = datetime.now().replace()
     policy = FullyConvPolicyBigMap
 
     n = max_exp_idx(exp_name)
@@ -66,13 +66,13 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     else:
         model.learn(total_timesteps=int(steps), tb_log_name=exp_name, callback=callback)
 
-    end_time = datetime.now().replace(microsecond=0)
+    end_time = datetime.now().replace()
     print("Start time  : ", start_time)
     print("End time  : ", end_time)
     print("Total training time  : ", end_time - start_time)
 
 ################################## MAIN ########################################
-game = 'maze'
+game = 'match3'
 representation = 'wide'
 experiment = None
 steps = 30000000

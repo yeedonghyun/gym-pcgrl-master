@@ -52,15 +52,13 @@ def is_all_cells_have_spawn_routes(map):
 
         visited[y][x] = True
 
-        connected_cells(y-1, x)
-        connected_cells(y+1, x)
-
+        connected_cells(y+1, x, False)
         if not moved_x:
-            connected_cells(y, x-1)
-            connected_cells(y, x+1)
+            connected_cells(y, x-1, True)
+            connected_cells(y, x+1, True)
 
     for x in range(width):
-        connected_cells(0, x, False)
+        connected_cells(0, x, True)
 
     for y in range(height):
         for x in range(width):
@@ -68,7 +66,6 @@ def is_all_cells_have_spawn_routes(map):
                 return False
 
     return True
-
 
 def main(game):
     _width = 11
@@ -78,8 +75,8 @@ def main(game):
 
     example_board = [
         [0, 1, 0, 0],
-        [1, 1, 1, 0],
-        [0, 1, 0, 1],
+        [0, 1, 1, 1],
+        [0, 0, 0, 0],
         [1, 1, 1, 1]
     ]
 

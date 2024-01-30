@@ -14,7 +14,7 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
      - max_trials: The number of trials per evaluation.
      - infer_kwargs: Args to pass to the environment.
     """
-    start_time = datetime.now().replace(microsecond=0)
+    start_time = datetime.now().replace()
     env_name = '{}-{}-v0'.format(game, representation)
     if game == "binary":
         model.FullyConvPolicy = model.FullyConvPolicyBigMap
@@ -50,7 +50,7 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
         save_image(test, path, 2)
     
     print("----------------------------------------------------") 
-    end_time = datetime.now().replace(microsecond=0)
+    end_time = datetime.now().replace()
     print("Start time  : ", start_time)
     print("End time  : ", end_time)
     print("Total inference time  : ", end_time - start_time)
