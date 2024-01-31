@@ -1,5 +1,5 @@
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_range_reward, is_all_cells_have_spawn_routes
+from gym_pcgrl.envs.helper import get_range_reward
 
 class Match3Problem(Problem):
     class Pos():
@@ -35,7 +35,7 @@ class Match3Problem(Problem):
 
         map_stats = {
             "swap_potential": 0,
-            "spawn_route": is_all_cells_have_spawn_routes(map)
+            "spawn_route": self.__is_all_cells_have_spawn_routes(map)
         }
 
         if not map_stats["spawn_route"] :
@@ -77,3 +77,32 @@ class Match3Problem(Problem):
         return {
             "swap_potential": new_stats["swap_potential"]
         }
+
+    def __is_all_cells_have_spawn_routes(map):
+        height = len(map)
+        width = len(map[0])
+        visited = [[False] * width for _ in range(height)]
+
+        def connected_cells(y, x, moved_x):
+            if y < 0 or y >= height or x < 0 or x >= width:
+                return 
+
+            if visited[y][x] or map[y][x] == 'solid':
+                return 
+
+            visited[y][x] = True
+
+            connected_cells(y+1, x, False)
+            if not moved_x:
+                connected_cells(y, x-1, True)
+                connected_cells(y, x+1, True)
+
+        for x in range(width):
+            connected_cells(0, x, True)
+
+        for y in range(height):
+            for x in range(width):
+                if not visited[y][x] and map[y][x] == 'empty':
+                    return False
+
+        return True

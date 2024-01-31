@@ -28,8 +28,8 @@ def callback(_locals, _globals):
             print(x[-1], 'timesteps')
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
 
-            if (n_steps + 1) % 1000000 == 0:
-                _locals['self'].save(os.path.join(log_dir, str(n_steps) + 'model.pkl'))
+            #if (n_steps + 1) % 1000000 == 0:
+            _locals['self'].save(os.path.join(log_dir, str(n_steps) + 'model.pkl'))
         else:
             print('{} monitor entries'.format(len(x)))
             pass
@@ -75,7 +75,8 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'match3'
 representation = 'wide'
 experiment = None
-steps = 30000000
+#steps = 20000000
+steps = 100000
 render = False
 logging = True
 n_cpu = 20

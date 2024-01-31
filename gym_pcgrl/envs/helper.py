@@ -405,32 +405,3 @@ def save_image(map, output_path, arction_dim):
     plt.axis('off')  
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.close()
-
-def is_all_cells_have_spawn_routes(map):
-    height = len(map)
-    width = len(map[0])
-    visited = [[False] * width for _ in range(height)]
-
-    def connected_cells(y, x, moved_x):
-        if y < 0 or y >= height or x < 0 or x >= width:
-            return 
-
-        if visited[y][x] or map[y][x] == 1:
-            return 
-
-        visited[y][x] = True
-
-        connected_cells(y+1, x, False)
-        if not moved_x:
-            connected_cells(y, x-1, True)
-            connected_cells(y, x+1, True)
-
-    for x in range(width):
-        connected_cells(0, x, True)
-
-    for y in range(height):
-        for x in range(width):
-            if not visited[y][x] and map[y][x] == 0:
-                return False
-
-    return True
