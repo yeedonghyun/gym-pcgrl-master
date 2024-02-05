@@ -67,6 +67,66 @@ def is_all_cells_have_spawn_routes(map):
 
     return True
 
+import heapq
+
+def a_star_algorithm(grid, start):
+    def heuristic(pos):
+        return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+
+    rows, cols = len(grid), len(grid[0])
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Right, Left, Down, Up
+
+    start = tuple(start)
+    goal = next((i, j) for i, row in enumerate(grid) for j, cell in enumerate(row) if cell == "goal")
+
+    visited = set()
+    priority_queue = [(0, start)]
+    heapq.heapify(priority_queue)
+    parent = {start: None}
+
+    while priority_queue:
+        current_cost, current_pos = heapq.heappop(priority_queue)
+
+        if current_pos == goal:
+            path = []
+            while current_pos:
+                path.append(current_pos)
+                current_pos = parent[current_pos]
+            return path[::-1]
+
+        if current_pos in visited:
+            continue
+
+        visited.add(current_pos)
+
+        for direction in directions:
+            new_pos = (current_pos[0] + direction[0], current_pos[1] + direction[1])
+
+            if 0 <= new_pos[0] < rows and 0 <= new_pos[1] < cols and grid[new_pos[0]][new_pos[1]] != "solid":
+                new_cost = current_cost + 1 + heuristic(new_pos)
+                if new_pos not in visited or new_cost < heapq.heappop(priority_queue)[0]:
+                    heapq.heappush(priority_queue, (new_cost, new_pos))
+                    parent[new_pos] = current_pos
+
+    return None  # No path found
+
+# Example Usage:
+map_example = [
+    ["empty", "empty", "empty", "solid", "empty"],
+    ["solid", "solid", "empty", "solid", "empty"],
+    ["player", "empty", "solid", "empty", "goal"],
+    ["empty", "solid", "empty", "solid", "empty"],
+    ["empty", "empty", "empty", "empty", "empty"]
+]
+
+start_position = (2, 0)
+path = a_star_algorithm(map_example, start_position)
+
+if path:
+    print("Shortest Path Found:", path)
+else:
+    print("No path found.")
+
 def main(game):
     _width = 11
     _height = 7

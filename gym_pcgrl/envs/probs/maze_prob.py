@@ -10,15 +10,17 @@ class MazeProblem(Problem):
         super().__init__()
         self._width = 11
         self._height = 7
-        self._prob = {"empty": 0.6, "solid":0.36, "player":0.02, "goal":0.02}
+        self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
         self._target_crossroads = 25
+        self._target_solids_around_goal = 1
 
         self._rewards = {
             "crossroads": 2,
             "players": 3,
             "goals": 3,
+            "solids_around_goal" : 50,
             "regions": 5
         }
 
@@ -36,10 +38,13 @@ class MazeProblem(Problem):
             "crossroads": 0,
             "players": calc_certain_tile(map_locations, ["player"]),
             "goals": calc_certain_tile(map_locations, ["goal"]),
+            "solids_around_goal": 0,
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
         if map_stats["players"] != 1 or map_stats["goals"] != 1:
             return map_stats
+        
+        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations)
 
         #BFS
         p_x, p_y = map_locations["player"][0]
@@ -87,22 +92,26 @@ class MazeProblem(Problem):
             "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
+            "solids_around_goal" : get_range_reward(new_stats["solids_around_goal"], old_stats["solids_around_goal"], self._target_solids_around_goal, self._target_solids_around_goal),
             "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }
         #calculate the total reward
         return rewards["crossroads"] * self._rewards["crossroads"] +\
             rewards["players"] * self._rewards["players"] +\
             rewards["goals"] * self._rewards["goals"] +\
+            rewards["solids_around_goal"] * self._rewards["solids_around_goal"] +\
             rewards["regions"] * self._rewards["regions"]
-
+            
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] == self._target_crossroads and new_stats["regions"] == 1 and new_stats["players"] == 1 and new_stats["goals"] == 1
+        #return new_stats["crossroads"] == self._target_crossroads and new_stats["regions"] == 1 and new_stats["players"] == 1 and new_stats["goals"] == 1
+        return new_stats["crossroads"] >= 50 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == self._target_solids_around_goal and new_stats["regions"] == 1
 
     def get_debug_info(self, new_stats, old_stats):
         return {
             "crossroads": new_stats["crossroads"], 
             "players": new_stats["players"],
             "goals": new_stats["goals"],
+            "solids_around_goal" : new_stats["solids_around_goal"],
             "regions": new_stats["regions"]
         }
     
@@ -122,3 +131,13 @@ class MazeProblem(Problem):
             return True
         
         return False
+
+    def __get_num_of_solids_around_goal(self, map, map_locations):
+        cnt = 0
+        player = map_locations["player"][0]
+        for dir in self.dir :
+            around_pos = [player[0] + dir[0], player[1] + dir[1]]
+            if not self.__out_of_range(around_pos) and map[around_pos[1]][around_pos[0]] == "solid" :
+                cnt += 1
+
+        return cnt

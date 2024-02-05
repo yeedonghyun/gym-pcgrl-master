@@ -11,28 +11,17 @@ best_mean_reward, n_steps = -np.inf, 0
 log_dir = './'
 
 def callback(_locals, _globals):
-    """
-    Callback called at each step (for DQN an others) or after n steps (see ACER or PPO2)
-    :param _locals: (dict)
-    :param _globals: (dict)
-    """
-
     global n_steps, best_mean_reward
     # Print stats every 1000 calls
-    if (n_steps + 1) % 10 == 0:
+    if (n_steps + 1) % 10 == 0 :
         x, y = ts2xy(load_results(log_dir), 'timesteps')
         if len(x) > 100:
             mean_reward = np.mean(y[-100:])
-            if mean_reward > best_mean_reward:
-                best_mean_reward = mean_reward
+            best_mean_reward = max(best_mean_reward, mean_reward)
             print(x[-1], 'timesteps')
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
-
-            #if (n_steps + 1) % 1000000 == 0:
             _locals['self'].save(os.path.join(log_dir, str(n_steps) + 'model.pkl'))
-        else:
-            print('{} monitor entries'.format(len(x)))
-            pass
+
     n_steps += 1
     # Returning False will stop training early
     return True
@@ -72,11 +61,10 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     print("Total training time  : ", end_time - start_time)
 
 ################################## MAIN ########################################
-game = 'match3'
+game = 'maze'
 representation = 'wide'
 experiment = None
-#steps = 20000000
-steps = 100000
+steps = 20000000
 render = False
 logging = True
 n_cpu = 20

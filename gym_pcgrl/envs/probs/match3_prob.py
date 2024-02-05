@@ -78,7 +78,7 @@ class Match3Problem(Problem):
             "swap_potential": new_stats["swap_potential"]
         }
 
-    def __is_all_cells_have_spawn_routes(map):
+    def __is_all_cells_have_spawn_routes(self, map):
         height = len(map)
         width = len(map[0])
         visited = [[False] * width for _ in range(height)]
