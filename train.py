@@ -12,7 +12,6 @@ log_dir = './'
 
 def callback(_locals, _globals):
     global n_steps, best_mean_reward
-    # Print stats every 1000 calls
     if (n_steps + 1) % 10 == 0 :
         x, y = ts2xy(load_results(log_dir), 'timesteps')
         if len(x) > 100:
@@ -23,7 +22,6 @@ def callback(_locals, _globals):
             _locals['self'].save(os.path.join(log_dir, str(n_steps) + 'model.pkl'))
 
     n_steps += 1
-    # Returning False will stop training early
     return True
 
 def main(game, representation, experiment, steps, n_cpu, render, logging, **kwargs):
