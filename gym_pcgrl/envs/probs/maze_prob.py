@@ -1,6 +1,7 @@
 import queue
 import copy
 import numpy as np
+import heapq
 
 from gym_pcgrl.envs.probs.problem import Problem
 from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num_regions, calc_certain_tile
@@ -8,8 +9,8 @@ from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 11
-        self._height = 7
+        self._width = 15
+        self._height = 15
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
@@ -41,61 +42,22 @@ class MazeProblem(Problem):
             "solids_around_goal": 0,
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
-        if map_stats["players"] != 1 or map_stats["goals"] != 1:
+        if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1:
             return map_stats
         
         map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations)
-
-        #BFS
-        p_x, p_y = map_locations["player"][0]
-        visited = np.zeros((self._height, self._width))
-        visited[p_y][p_x] = True
-
-        # number of crossings per route and start position
-        route = [np.array([0, 0]), np.array([p_x, p_y])]                                     
-
-        Q = queue.Queue()
-        Q.put(route)
-
-        while not Q.empty():
-            temp_Q = queue.Queue()
-
-            while not Q.empty():
-                cur_route = copy.deepcopy(Q.get())
-                players_moved_by_dir = []
-
-                for dir in self.dir:
-                    player = self.__move_pos(cur_route[-1], dir, visited, map)
-
-                    if player[0] != cur_route[-1][0] or player[1] != cur_route[-1][1] :
-                        players_moved_by_dir.append(player)
-
-                cur_route[0][0] += len(players_moved_by_dir)
-                
-                for pos in players_moved_by_dir:    
-                    if map[pos[1]][pos[0]] == "goal":
-                        map_stats["crossroads"] = cur_route[0][0]
-                        return map_stats
-
-                    temp_route = cur_route.copy()
-                    temp_route.append(pos)
-                    temp_Q.put(temp_route)
-                    visited[pos[1]][pos[0]] = True
-
-            Q = temp_Q
+        map_stats["crossroads"] = self.__a_star(map, map_locations["player"])
 
         return map_stats
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            #"crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._target_crossroads, self._target_crossroads),
             "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "solids_around_goal" : get_range_reward(new_stats["solids_around_goal"], old_stats["solids_around_goal"], self._target_solids_around_goal, self._target_solids_around_goal),
             "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }
-        #calculate the total reward
         return rewards["crossroads"] * self._rewards["crossroads"] +\
             rewards["players"] * self._rewards["players"] +\
             rewards["goals"] * self._rewards["goals"] +\
@@ -103,7 +65,6 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        #return new_stats["crossroads"] == self._target_crossroads and new_stats["regions"] == 1 and new_stats["players"] == 1 and new_stats["goals"] == 1
         return new_stats["crossroads"] >= 50 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == self._target_solids_around_goal and new_stats["regions"] == 1
 
     def get_debug_info(self, new_stats, old_stats):
@@ -114,23 +75,6 @@ class MazeProblem(Problem):
             "solids_around_goal" : new_stats["solids_around_goal"],
             "regions": new_stats["regions"]
         }
-    
-    def __move_pos(self, start, dir, visited, map):
-        pos = copy.deepcopy(start)
-
-        while not self.__out_of_range(pos + dir) and map[pos[1]+ dir[1]][pos[0] + dir[0]] != "solid":
-            pos += dir
-
-        if visited[pos[1]][pos[0]]:
-            return start
-
-        return pos
-    
-    def __out_of_range(self, pos):
-        if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
-            return True
-        
-        return False
 
     def __get_num_of_solids_around_goal(self, map, map_locations):
         cnt = 0
@@ -141,3 +85,55 @@ class MazeProblem(Problem):
                 cnt += 1
 
         return cnt
+    
+    def __out_of_range(self, pos):
+        if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
+            return True
+        
+        return False
+    
+    def __a_star(self, map, start):
+        def count_valid_directions(pos):
+            np_pos = np.array(copy.deepcopy(pos))
+            num_of_movable_dir = 0
+            for direction in dir:
+                if not self.__out_of_range(np_pos + direction) and map[np_pos[1] + direction[1]][np_pos[0] + direction[0]] == "empty" :
+                    num_of_movable_dir += 1
+
+            return num_of_movable_dir
+
+        def move_pos(pos, dir):
+            np_pos = np.array(copy.deepcopy(pos))
+            while not self.__out_of_range(np_pos + dir) and map[np_pos[1]+ dir[1]][np_pos[0] + dir[0]] != "solid":
+                np_pos += dir
+
+            return tuple(np_pos)
+            
+        dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
+
+        start = tuple(start)
+        visited = set()
+        visited.add(start)
+        priority_queue = [(0, start)]
+        heapq.heapify(priority_queue)
+        num_dir = count_valid_directions(start)
+
+        while priority_queue:
+            current_cost, current_pos = heapq.heappop(priority_queue)
+            num_dir = count_valid_directions(start) - 1
+
+            for direction in dir:
+                new_pos = move_pos(current_pos, direction)
+                new_cost = current_cost + num_dir
+
+                if new_pos[0] == current_pos[0] and new_pos[1] == current_pos[1] :
+                    continue
+
+                if map[new_pos[1]][new_pos[0]] == "goal":
+                    return new_cost + 1
+                
+                if new_pos not in visited:
+                    heapq.heappush(priority_queue, (new_cost, new_pos))
+                    visited.add(new_pos)
+
+        return 0
