@@ -35,6 +35,7 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
         for j in range(500) :
             action, _ = agent.predict(obs)
             obs, _, dones, info = env.step(action)
+
             test = []
             for o in obs :
                 for b in o :
@@ -42,15 +43,21 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
                     test.append(old)
             path = output_file_path + str(j) + '_' + str(info[0]['crossroads']) + '_' + str(info[0]['regions'])
             save_image(test, path, 4)
+
             if kwargs.get('verbose', False):
                 print(info[0])
             if dones:
                 break
             
-
-                
-        #path = output_file_path + str(i) + '_' + str(info[0]['crossroads'])
-        #save_image(test, path, 2)
+        """
+        test = []
+        for o in obs :
+            for b in o :
+                old = [np.where(r==1)[0][0] for r in b]
+                test.append(old)
+        path = output_file_path + str(j) + '_' + str(info[0]['crossroads']) + '_' + str(info[0]['regions'])
+        save_image(test, path, 4)
+        """
     
     print("----------------------------------------------------") 
     end_time = datetime.now().replace()

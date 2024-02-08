@@ -44,8 +44,8 @@ class MazeProblem(Problem):
         if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1:
             return map_stats
         
-        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations)
-        map_stats["crossroads"] = self.__a_star(map, map_locations["player"])
+        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations["player"][0])
+        map_stats["crossroads"] = self.__a_star(map, map_locations["player"][0])
 
         return map_stats
     
@@ -75,9 +75,8 @@ class MazeProblem(Problem):
             "regions": new_stats["regions"]
         }
 
-    def __get_num_of_solids_around_goal(self, map, map_locations):
+    def __get_num_of_solids_around_goal(self, map, player):
         cnt = 0
-        player = map_locations["player"][0]
         for dir in self.dir :
             around_pos = [player[0] + dir[0], player[1] + dir[1]]
             if not self.__out_of_range(around_pos) and map[around_pos[1]][around_pos[0]] == "solid" :
@@ -108,8 +107,6 @@ class MazeProblem(Problem):
 
             return tuple(np_pos)
             
-        dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
-
         start = tuple(start)
         visited = set()
         visited.add(start)
