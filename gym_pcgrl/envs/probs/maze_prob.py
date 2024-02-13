@@ -26,8 +26,6 @@ class MazeProblem(Problem):
 
         self.dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
 
-        self.step = 0
-
     def get_tile_types(self):
         return ["empty", "solid", "player", "goal"]
 
@@ -44,7 +42,7 @@ class MazeProblem(Problem):
         if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1:
             return map_stats
         
-        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations["player"][0])
+        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations["goal"][0])
         map_stats["crossroads"] = self.__a_star(map, map_locations["player"][0])
 
         return map_stats
