@@ -8,8 +8,8 @@ from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 15
-        self._height = 15
+        self._width = 10
+        self._height = 10
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
@@ -94,7 +94,7 @@ class MazeProblem(Problem):
         def count_valid_directions(pos):
             np_pos = np.array(copy.deepcopy(pos))
             num_of_movable_dir = 0
-            for direction in dir:
+            for direction in self.dir:
                 if not self.__out_of_range(np_pos + direction) and map[np_pos[1] + direction[1]][np_pos[0] + direction[0]] == "empty" :
                     num_of_movable_dir += 1
 
@@ -118,7 +118,7 @@ class MazeProblem(Problem):
             current_cost, current_pos = heapq.heappop(priority_queue)
             num_dir = count_valid_directions(start) - 1
 
-            for direction in dir:
+            for direction in self.dir:
                 new_pos = move_pos(current_pos, direction)
                 new_cost = current_cost + num_dir
 

@@ -63,7 +63,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 50000000
+steps = 100000000
 render = False
 logging = True
 n_cpu = 20
