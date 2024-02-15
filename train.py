@@ -12,15 +12,15 @@ log_dir = './'
 
 def callback(_locals, _globals):
     global n_steps, best_mean_reward
-    if (n_steps + 1) % 10 == 0:
+    if (n_steps + 1) % 100 == 0:
         x, y = ts2xy(load_results(log_dir), 'timesteps')
         if len(x) > 100:
+            best_mean_reward = max(mean_reward, best_mean_reward)
             mean_reward = np.mean(y[-100:])
             print(x[-1], 'timesteps')
             print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
 
-            best_mean_reward = max(mean_reward, best_mean_reward)
-            _locals['self'].save(os.path.join(log_dir, 'model.pkl'))
+        _locals['self'].save(os.path.join(log_dir, 'model.pkl'))
 
     n_steps += 1
     return True
@@ -63,7 +63,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 100000000
+steps = 50000000
 render = False
 logging = True
 n_cpu = 20

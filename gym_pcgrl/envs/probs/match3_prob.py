@@ -9,8 +9,8 @@ class Match3Problem(Problem):
 
     def __init__(self):
         super().__init__()
-        self._width = 11
-        self._height = 7
+        self._width = 10
+        self._height = 10
         self._prob = {"empty": 0.5, "solid":0.5}
         self._border_tile = "solid"
 

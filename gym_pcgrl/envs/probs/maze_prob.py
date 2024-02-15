@@ -4,17 +4,19 @@ import heapq
 
 from gym_pcgrl.envs.probs.problem import Problem
 from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num_regions, calc_certain_tile
-    
+
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 10
+        self._width = 13
+        #player[0] == width
         self._height = 10
+        #player[1] == height
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
-        self._target_crossroads = 25
-        self._target_solids_around_goal = 1
+        self._desired_crossroads = 25
+        self._desired_number_of_solids_around_goal = 2
 
         self._rewards = {
             "crossroads": 2,
@@ -42,7 +44,7 @@ class MazeProblem(Problem):
         if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1:
             return map_stats
         
-        map_stats["solids_around_goal"] = self.__get_num_of_solids_around_goal(map, map_locations["goal"][0])
+        map_stats["solids_around_goal"] = self.__is_goal_area_valid(map, map_locations["goal"][0])
         map_stats["crossroads"] = self.__a_star(map, map_locations["player"][0])
 
         return map_stats
@@ -52,7 +54,7 @@ class MazeProblem(Problem):
             "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
-            "solids_around_goal" : get_range_reward(new_stats["solids_around_goal"], old_stats["solids_around_goal"], self._target_solids_around_goal, self._target_solids_around_goal),
+            "solids_around_goal" : get_range_reward(new_stats["solids_around_goal"], old_stats["solids_around_goal"], 1, 1),
             "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }
         return rewards["crossroads"] * self._rewards["crossroads"] +\
@@ -62,7 +64,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] >= 50 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == self._target_solids_around_goal and new_stats["regions"] == 1
+        return new_stats["crossroads"] >= 50 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == 1 and new_stats["regions"] == 1
 
     def get_debug_info(self, new_stats, old_stats):
         return {
@@ -73,14 +75,19 @@ class MazeProblem(Problem):
             "regions": new_stats["regions"]
         }
 
-    def __get_num_of_solids_around_goal(self, map, player):
+    def __is_goal_area_valid(self, map, player):
+        if player[0] == 0 or player[0] == self._width - 1 or player[1] == 0 or player[1] == self._height - 1:
+            return False
+
         cnt = 0
         for dir in self.dir :
             around_pos = [player[0] + dir[0], player[1] + dir[1]]
             if not self.__out_of_range(around_pos) and map[around_pos[1]][around_pos[0]] == "solid" :
                 cnt += 1
-
-        return cnt
+        if cnt == self._desired_number_of_solids_around_goal:
+            return True 
+        
+        return False
     
     def __out_of_range(self, pos):
         if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
@@ -130,4 +137,4 @@ class MazeProblem(Problem):
                     heapq.heappush(priority_queue, (new_cost, new_pos))
                     visited.add(new_pos)
 
-        return 0
+        return False
