@@ -48,7 +48,8 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     }
     env = make_vec_envs(env_name, representation, log_dir, n_cpu, **kwargs)
     model = PPO2(policy, env, verbose=1, tensorboard_log="./runs")
-    
+    model.load('models/{}/{}/model.pkl'.format(game, representation))
+
     if not logging:
         model.learn(total_timesteps=int(steps), tb_log_name=exp_name)
     else:
@@ -63,7 +64,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 50000000
+steps = 100000000
 render = False
 logging = True
 n_cpu = 20
