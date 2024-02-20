@@ -28,11 +28,14 @@ class MazeProblem(Problem):
 
         self.dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
 
+        self.n_action = 0
+
     def get_tile_types(self):
         return ["empty", "solid", "player", "goal"]
 
     def get_stats(self, map):
         map_locations = get_tile_locations(map, self.get_tile_types())
+        self.n_action += 1
 
         map_stats = {
             "crossroads": 0,
@@ -44,7 +47,7 @@ class MazeProblem(Problem):
         if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1:
             return map_stats
         
-        map_stats["solids_around_goal"] = self.__is_goal_area_valid(map, map_locations["goal"][0])
+        map_stats["solids_around_goal"] = self.__goal_area_valid(map, map_locations["goal"][0])
         map_stats["crossroads"] = self.__a_star(map, map_locations["player"][0])
 
         return map_stats
@@ -64,7 +67,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] >= 50 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == 1 and new_stats["regions"] == 1
+        return new_stats["crossroads"] >= 10 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["solids_around_goal"] == 1 and new_stats["regions"] == 1 or self.n_action >= 1000000
 
     def get_debug_info(self, new_stats, old_stats):
         return {
@@ -75,39 +78,39 @@ class MazeProblem(Problem):
             "regions": new_stats["regions"]
         }
 
-    def __is_goal_area_valid(self, map, player):
+    def __goal_area_valid(self, map, player):
         if player[0] == 0 or player[0] == self._width - 1 or player[1] == 0 or player[1] == self._height - 1:
             return False
 
         cnt = 0
         for dir in self.dir :
             around_pos = [player[0] + dir[0], player[1] + dir[1]]
-            if not self.__out_of_range(around_pos) and map[around_pos[1]][around_pos[0]] == "solid" :
+            if map[around_pos[1]][around_pos[0]] == "solid" :
                 cnt += 1
         if cnt == self._desired_number_of_solids_around_goal:
             return True 
         
         return False
     
-    def __out_of_range(self, pos):
-        if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
-            return True
-        
-        return False
-    
     def __a_star(self, map, start):
+        def out_of_range(pos):
+            if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
+                return True
+        
+            return False
+    
         def count_valid_directions(pos):
             np_pos = np.array(copy.deepcopy(pos))
             num_of_movable_dir = 0
             for direction in self.dir:
-                if not self.__out_of_range(np_pos + direction) and map[np_pos[1] + direction[1]][np_pos[0] + direction[0]] == "empty" :
+                if not out_of_range(np_pos + direction) and map[np_pos[1] + direction[1]][np_pos[0] + direction[0]] == "empty" :
                     num_of_movable_dir += 1
 
             return num_of_movable_dir
 
         def move_pos(pos, dir):
             np_pos = np.array(copy.deepcopy(pos))
-            while not self.__out_of_range(np_pos + dir) and map[np_pos[1]+ dir[1]][np_pos[0] + dir[0]] != "solid":
+            while not out_of_range(np_pos + dir) and map[np_pos[1]+ dir[1]][np_pos[0] + dir[0]] != "solid":
                 np_pos += dir
 
             return tuple(np_pos)
