@@ -4,26 +4,9 @@ import os
 from model import FullyConvPolicyBigMap
 from utils import get_exp_name, max_exp_idx, make_vec_envs
 from stable_baselines import PPO2
-from stable_baselines.results_plotter import load_results, ts2xy
 from datetime import datetime
 
-best_mean_reward, n_steps = -np.inf, 0
 log_dir = './'
-
-def callback(_locals, _globals):
-    global n_steps, best_mean_reward
-    if (n_steps + 1) % 100 == 0:
-        x, y = ts2xy(load_results(log_dir), 'timesteps')
-        if len(x) > 100:
-            best_mean_reward = max(mean_reward, best_mean_reward)
-            mean_reward = np.mean(y[-100:])
-            print(x[-1], 'timesteps')
-            print("Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(best_mean_reward, mean_reward))
-
-        _locals['self'].save(os.path.join(log_dir, 'model.pkl'))
-
-    n_steps += 1
-    return True
 
 def main(game, representation, experiment, steps, n_cpu, render, logging, **kwargs):
     env_name = '{}-{}-v0'.format(game, representation)
@@ -48,12 +31,8 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
     }
     env = make_vec_envs(env_name, representation, log_dir, n_cpu, **kwargs)
     model = PPO2(policy, env, verbose=1, tensorboard_log="./runs")
-    model.load('models/{}/{}/model.pkl'.format(game, representation))
-
-    if not logging:
-        model.learn(total_timesteps=int(steps), tb_log_name=exp_name)
-    else:
-        model.learn(total_timesteps=int(steps), tb_log_name=exp_name, callback=callback)
+    model.learn(total_timesteps=int(steps), tb_log_name=exp_name)
+    model.save(os.path.join(log_dir, 'model.pkl'))
 
     end_time = datetime.now().replace()
     print("Start time  : ", start_time)
@@ -64,7 +43,7 @@ def main(game, representation, experiment, steps, n_cpu, render, logging, **kwar
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 100000000
+steps = 50000000
 render = False
 logging = True
 n_cpu = 20
