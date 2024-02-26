@@ -14,7 +14,7 @@ class Match3Problem(Problem):
         self._prob = {"empty": 0.5, "solid":0.5}
         self._border_tile = "solid"
 
-        self._target_swap_potential = 300
+        self._desired_swap_potential = 300
 
         self.vector = [[self.Pos(-1, 0), self.Pos(-2, 0)], [self.Pos(-1, 0), self.Pos(1, 0)], [self.Pos(1, 0), self.Pos(2, 0)], 
                     [self.Pos(0, -1), self.Pos(0, -2)], [self.Pos(0, -1), self.Pos(0, 1)], [self.Pos(0, 1), self.Pos(0, 2)]]
@@ -65,13 +65,13 @@ class Match3Problem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._target_swap_potential - 10, self._target_swap_potential + 10),
+            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - 10, self._target_swap_potential + 10),
         }
         #calculate the total reward
         return rewards["swap_potential"] * self._rewards["swap_potential"] 
 
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["swap_potential"] >= self._target_swap_potential - 10 and new_stats["swap_potential"] <= self._target_swap_potential + 10
+        return new_stats["swap_potential"] >= self._desired_swap_potential - 10 and new_stats["swap_potential"] <= self._desired_swap_potential + 10
 
     def get_debug_info(self, new_stats, old_stats):
         return {
