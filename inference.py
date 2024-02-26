@@ -1,7 +1,3 @@
-"""
-Run a trained agent and get generated maps
-"""
-import model
 import numpy as np
 
 from stable_baselines import PPO2
@@ -9,31 +5,18 @@ from utils import make_vec_envs
 from datetime import datetime
 from gym_pcgrl.envs.helper import save_image
 
-def infer(game, representation, model_path, output_file_path, **kwargs):
-    """
-     - max_trials: The number of trials per evaluation.
-     - infer_kwargs: Args to pass to the environment.
-    """
+def inference(game, representation, model_path, output_file_path, **kwargs):
     start_time = datetime.now().replace()
-    env_name = '{}-{}-v0'.format(game, representation)
-    if game == "binary":
-        model.FullyConvPolicy = model.FullyConvPolicyBigMap
-        kwargs['cropped_size'] = 28
-    elif game == "zelda":
-        model.FullyConvPolicy = model.FullyConvPolicyBigMap
-        kwargs['cropped_size'] = 22
-    elif game == "sokoban":
-        model.FullyConvPolicy = model.FullyConvPolicySmallMap
-        kwargs['cropped_size'] = 10
-    kwargs['render'] = False
 
-    agent = PPO2.load(model_path)
+    env_name = '{}-{}-v0'.format(game, representation)
     env = make_vec_envs(env_name, representation, None, 1, **kwargs)
 
+    model = PPO2.load(model_path)
+    
     for i in range(kwargs.get('trials', 1)):
         obs = env.reset()
         for j in range(1000) :
-            action, _ = agent.predict(obs)
+            action, _ = model.predict(obs)
             obs, _, dones, info = env.step(action)
 
             """
@@ -46,8 +29,6 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
             save_image(test, path, 4)
 
             """
-            if kwargs.get('verbose', False):
-                print(info[0])
             if dones:
                 break
             
@@ -61,12 +42,10 @@ def infer(game, representation, model_path, output_file_path, **kwargs):
         save_image(test, path, 4)
         #"""
     
-    print("----------------------------------------------------") 
     end_time = datetime.now().replace()
     print("Start time  : ", start_time)
     print("End time  : ", end_time)
     print("Total inference time  : ", end_time - start_time)
-    print("----------------------------------------------------") 
 
 ################################## MAIN ########################################
 game = 'maze'
@@ -75,8 +54,9 @@ model_path = 'models/{}/{}/model.pkl'.format(game, representation)
 output_file_path = 'image/{}/'.format(game)
 kwargs = {
     'trials': 5,
-    'verbose': False
+    'verbose': False,
+    'render': False
 }
 
 if __name__ == '__main__':
-    infer(game, representation, model_path, output_file_path, **kwargs)
+    inference(game, representation, model_path, output_file_path, **kwargs)
