@@ -11,7 +11,7 @@ from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 13
+        self._width = 10
         self._height = 10
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
@@ -41,12 +41,16 @@ class MazeProblem(Problem):
             "crossroads": 0,
             "players": calc_certain_tile(map_locations, ["player"]),
             "goals": calc_certain_tile(map_locations, ["goal"]),
-            "valid_goal": self.__is_valid_goal(map, map_locations),
+            "valid_goal": False,
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
-        if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1 or not map_stats["valid_goal"]:
+        if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1 :
             return map_stats
-        
+
+        map_stats["valid_goal"] = self.__is_valid_goal(map, map_locations)
+        if not map_stats["valid_goal"] :
+            return map_stats
+
         map_stats["crossroads"] = self.__a_star(map, map_locations)
 
         return map_stats
@@ -66,7 +70,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] >= 10 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["valid_goal"] == 1 and new_stats["regions"] == 1 or (self.n_action + 1) % 500 == 0
+        return new_stats["crossroads"] >= 10 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["valid_goal"] == 1 and new_stats["regions"] == 1 or (self.n_action + 1) % 1000 == 0
     
     def get_debug_info(self, new_stats, old_stats):
         return {
@@ -78,7 +82,7 @@ class MazeProblem(Problem):
         }
 
     def __is_valid_goal(self, map, map_locations):
-        goal =  map_locations["goal"][0]
+        goal = map_locations["goal"][0]
 
         if goal[0] == 0 or goal[0] == self._width - 1 or goal[1] == 0 or goal[1] == self._height - 1:
             return True
