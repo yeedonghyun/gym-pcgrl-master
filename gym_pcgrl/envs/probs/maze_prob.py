@@ -70,7 +70,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] >= 10 and new_stats["players"] == 1 and new_stats["goals"] == 1 and new_stats["valid_goal"] == 1 and new_stats["regions"] == 1 or (self.n_action + 1) % 1000 == 0
+        return new_stats["crossroads"] >= 10 or (self.n_action + 1) % 1000 == 0
     
     def get_debug_info(self, new_stats, old_stats):
         return {
