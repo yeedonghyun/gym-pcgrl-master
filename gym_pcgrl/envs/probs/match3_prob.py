@@ -9,8 +9,8 @@ class Match3Problem(Problem):
 
     def __init__(self):
         super().__init__()
-        self._width = 10
-        self._height = 10
+        self._width = 9
+        self._height = 7
         self._prob = {"empty": 0.5, "solid":0.5}
         self._border_tile = "solid"
 
@@ -65,17 +65,18 @@ class Match3Problem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - 10, self._target_swap_potential + 10),
+            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - 10, self._desired_swap_potential + 10),
+            "spawn_route": get_range_reward(new_stats["spawn_route"], old_stats["spawn_route"], 1, 1)
         }
-        #calculate the total reward
-        return rewards["swap_potential"] * self._rewards["swap_potential"] 
+        return rewards["swap_potential"] * self._rewards["swap_potential"] + rewards["spawn_route"] * self._rewards["spawn_route"]
 
     def get_episode_over(self, new_stats, old_stats):
         return new_stats["swap_potential"] >= self._desired_swap_potential - 10 and new_stats["swap_potential"] <= self._desired_swap_potential + 10
 
     def get_debug_info(self, new_stats, old_stats):
         return {
-            "swap_potential": new_stats["swap_potential"]
+            "swap_potential": new_stats["swap_potential"],
+            "spawn_route": new_stats["spawn_route"]
         }
 
     def __is_all_cells_have_spawn_routes(self, map):
