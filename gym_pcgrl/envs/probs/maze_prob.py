@@ -57,7 +57,7 @@ class MazeProblem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads, self._desired_crossroads),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "valid_goal" : get_range_reward(new_stats["valid_goal"], old_stats["valid_goal"], 1, 1),
@@ -70,7 +70,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["crossroads"] >= 10 or (self.n_action + 1) % 1000 == 0
+        return new_stats["crossroads"] == _desired_crossroads or (self.n_action + 1) % 1000 == 0
     
     def get_debug_info(self, new_stats, old_stats):
         return {
