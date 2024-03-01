@@ -19,29 +19,11 @@ def inference(game, representation, model_path, output_file_path, **kwargs):
             action, _ = model.predict(obs)
             obs, _, dones, info = env.step(action)
 
-            """
-            test = []
-            for o in obs :
-                for b in o :
-                    old = [np.where(r==1)[0][0] for r in b]
-                    test.append(old)
-            path = output_file_path + str(j) + '_' + str(info[0]['crossroads']))
-            save_image(test, path, 4)
-
-            """
-            if dones:
+            if dones:        
+                path = output_file_path + str(i) + '_' + str(info[0]['crossroads'])
+                save_image(info[0]['terminal_observation'], path)
                 break
-            
-        #"""
-        test = []
-        for o in obs :
-            for b in o :
-                old = [np.where(r==1)[0][0] for r in b]
-                test.append(old)
-        path = output_file_path + str(i) + '_' + str(info[0]['crossroads'])
-        save_image(test, path, 4)
-        #"""
-    
+
     end_time = datetime.now().replace()
     print("Start time  : ", start_time)
     print("End time  : ", end_time)

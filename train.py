@@ -27,7 +27,7 @@ def main(game, representation, experiment, steps, n_cpu, **kwargs):
     print("Total training time  : ", end_time - start_time)
 
 ################################## MAIN ########################################
-game = 'maze'
+game = 'match3'
 representation = 'wide'
 experiment = None
 steps = 50000000

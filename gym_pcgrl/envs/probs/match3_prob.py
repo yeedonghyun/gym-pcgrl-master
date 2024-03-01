@@ -14,7 +14,7 @@ class Match3Problem(Problem):
         self._prob = {"empty": 0.5, "solid":0.5}
         self._border_tile = "solid"
 
-        self._desired_swap_potential = 300
+        self._desired_swap_potential = 500
 
         self.vector = [[self.Pos(-1, 0), self.Pos(-2, 0)], [self.Pos(-1, 0), self.Pos(1, 0)], [self.Pos(1, 0), self.Pos(2, 0)], 
                     [self.Pos(0, -1), self.Pos(0, -2)], [self.Pos(0, -1), self.Pos(0, 1)], [self.Pos(0, 1), self.Pos(0, 2)]]
@@ -25,7 +25,6 @@ class Match3Problem(Problem):
         
         self._rewards = {
             "swap_potential": 1,
-            "spawn_route": 50,
         }
 
     def get_tile_types(self):
@@ -35,11 +34,7 @@ class Match3Problem(Problem):
 
         map_stats = {
             "swap_potential": 0,
-            "spawn_route": self.__is_all_cells_have_spawn_routes(map)
         }
-
-        if not map_stats["spawn_route"] :
-            return map_stats
 
         for x in range(self._width):
             for y in range(self._height):
@@ -65,45 +60,14 @@ class Match3Problem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - 10, self._desired_swap_potential + 10),
-            "spawn_route": get_range_reward(new_stats["spawn_route"], old_stats["spawn_route"], 1, 1)
+            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - 20, self._desired_swap_potential + 20),
         }
-        return rewards["swap_potential"] * self._rewards["swap_potential"] + rewards["spawn_route"] * self._rewards["spawn_route"]
+        return rewards["swap_potential"] * self._rewards["swap_potential"]
 
     def get_episode_over(self, new_stats, old_stats):
-        return new_stats["swap_potential"] >= self._desired_swap_potential - 10 and new_stats["swap_potential"] <= self._desired_swap_potential + 10
+        return new_stats["swap_potential"] >= self._desired_swap_potential - 20 and new_stats["swap_potential"] <= self._desired_swap_potential + 20
 
     def get_debug_info(self, new_stats, old_stats):
         return {
             "swap_potential": new_stats["swap_potential"],
-            "spawn_route": new_stats["spawn_route"]
         }
-
-    def __is_all_cells_have_spawn_routes(self, map):
-        height = len(map)
-        width = len(map[0])
-        visited = [[False] * width for _ in range(height)]
-
-        def connected_cells(y, x, moved_x):
-            if y < 0 or y >= height or x < 0 or x >= width:
-                return 
-
-            if visited[y][x] or map[y][x] == 'solid':
-                return 
-
-            visited[y][x] = True
-
-            connected_cells(y+1, x, False)
-            if not moved_x:
-                connected_cells(y, x-1, True)
-                connected_cells(y, x+1, True)
-
-        for x in range(width):
-            connected_cells(0, x, True)
-
-        for y in range(height):
-            for x in range(width):
-                if not visited[y][x] and map[y][x] == 'empty':
-                    return False
-
-        return True

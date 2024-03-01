@@ -377,31 +377,23 @@ def get_range_reward(new_value, old_value, low, high):
     if new_value < low and old_value > high:
         return high - old_value + low - new_value
 
-def save_image(map, output_path, arction_dim):
-    height = len(map)
-    width = len(map[0])
-    color_per_type = []
+def save_image(obs, output_path):
+    map = []
+    for o in obs :
+        line = []
+        for b in o :
+            if int(b[0]) == 1:
+                line.append(to_rgba(np.array([1, 1, 1])))
+            elif int(b[1]) == 1:
+                line.append(to_rgba(np.array([0, 0, 0])))
+            elif int(b[2]) == 1:
+                line.append(to_rgba(np.array([0, 1, 0])))
+            else :
+                line.append(to_rgba(np.array([1, 0, 0])))
+                
+        map.append(line)
 
-    for i in range(arction_dim):
-        if i == 0:
-            color_per_type.append(to_rgba(np.array([1, 1, 1])))
-        elif i == 1:
-            color_per_type.append(to_rgba(np.array([0, 0, 0])))
-        elif i == 2:
-            color_per_type.append(to_rgba(np.array([0, 1, 0])))
-        else :
-            color_per_type.append(to_rgba(np.array([1, 0, 0])))
-
-    colored_list = []
-    for y in range(height):
-        row = []
-        for x in range(width):
-            color = color_per_type[map[y][x]]
-            row.append(color)
-            
-        colored_list.append(row)
-
-    plt.imshow(colored_list, cmap='viridis') 
+    plt.imshow(map, cmap='viridis') 
     plt.axis('off')  
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.close()

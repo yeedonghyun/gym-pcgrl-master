@@ -99,12 +99,13 @@ class MazeProblem(Problem):
                 return True
         
             return False
-    
+
         def count_valid_directions(pos):
             np_pos = np.array(copy.deepcopy(pos))
             num_of_movable_dir = 0
             for direction in self.dir:
-                if not out_of_range(np_pos + direction) and map[np_pos[1] + direction[1]][np_pos[0] + direction[0]] == "empty" :
+                new_pos = np.array(np_pos + direction)
+                if not out_of_range(new_pos) and map[new_pos[1]][new_pos[0]] == "empty" :
                     num_of_movable_dir += 1
 
             return num_of_movable_dir
@@ -121,17 +122,16 @@ class MazeProblem(Problem):
         visited.add(start)
         priority_queue = [(0, start)]
         heapq.heapify(priority_queue)
-        num_dir = count_valid_directions(start)
 
         while priority_queue:
-            current_cost, current_pos = heapq.heappop(priority_queue)
-            num_dir = count_valid_directions(start) - 1
+            prev_cost, prev_pos = heapq.heappop(priority_queue)
+            cur_cost = count_valid_directions(prev_pos) - 1
 
             for direction in self.dir:
-                new_pos = move_pos(current_pos, direction)
-                new_cost = current_cost + num_dir
+                new_pos = move_pos(prev_pos, direction)
+                new_cost = prev_cost + cur_cost
 
-                if new_pos[0] == current_pos[0] and new_pos[1] == current_pos[1] :
+                if new_pos[0] == prev_pos[0] and new_pos[1] == prev_pos[1] :
                     continue
 
                 if map[new_pos[1]][new_pos[0]] == "goal":
