@@ -19,7 +19,9 @@ def main(game, representation, experiment, steps, n_cpu, **kwargs):
     policy = FullyConvPolicyBigMap
     model = PPO2(policy, env, verbose=1, tensorboard_log="./runs")
     model.learn(total_timesteps=int(steps), tb_log_name=exp_name)
-    model.save(os.path.join(log_dir, 'model.pkl'))
+    
+    model_dir = 'models/{}/{}/'.format(game, representation)
+    model.save(model_dir + 'model.pkl')
 
     end_time = datetime.now().replace()
     print("Start time  : ", start_time)
