@@ -16,10 +16,11 @@ class MazeProblem(Problem):
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
-        self._desired_crossroads = 25
+        self._desired_crossroads = 15
+        self._threshold = 1
 
         self._rewards = {
-            "crossroads": 2,
+            "crossroads": 1,
             "players": 3,
             "goals": 3,
             "valid_goal" : 10,
@@ -57,7 +58,7 @@ class MazeProblem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads, self._desired_crossroads),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads - self._threshold, self._desired_crossroads + self._threshold),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "valid_goal" : get_range_reward(new_stats["valid_goal"], old_stats["valid_goal"], 1, 1),
@@ -70,9 +71,8 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        #return new_stats["crossroads"] == self._desired_crossroads or (self.n_action + 1) % 1000 == 0
-        return new_stats["crossroads"] == self._desired_crossroads
-    
+        return abs(new_stats["crossroads"] - self._desired_crossroads) <= self._threshold or (self.n_action + 1) % 1000 == 0
+
     def get_debug_info(self, new_stats, old_stats):
         return {
             "crossroads": new_stats["crossroads"], 
@@ -104,8 +104,8 @@ class MazeProblem(Problem):
         def count_valid_directions(pos):
             np_pos = np.array(copy.deepcopy(pos))
             num_of_movable_dir = 0
-            for direction in self.dir:
-                new_pos = np.array(np_pos + direction)
+            for dir in self.dir:
+                new_pos = np.array(np_pos + dir)
                 if not out_of_range(new_pos) and map[new_pos[1]][new_pos[0]] == "empty" :
                     num_of_movable_dir += 1
 
