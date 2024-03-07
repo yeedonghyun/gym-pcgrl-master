@@ -16,7 +16,7 @@ class MazeProblem(Problem):
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
-        self._desired_crossroads = 15
+        self._desired_crossroads = 25
         self._threshold = 1
 
         self._rewards = {
