@@ -29,14 +29,11 @@ class MazeProblem(Problem):
 
         self._dirs = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
 
-        self.n_action = 0
-
     def get_tile_types(self):
         return ["empty", "solid", "player", "goal"]
 
     def get_stats(self, map):
         map_locations = get_tile_locations(map, self.get_tile_types())
-        self.n_action += 1
 
         map_stats = {
             "crossroads": self._width * self._height,
@@ -61,8 +58,7 @@ class MazeProblem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
-            #"crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads - self._threshold, self._desired_crossroads + self._threshold),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads - self._threshold, self._desired_crossroads + self._threshold),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "valid_goal" : get_range_reward(new_stats["valid_goal"], old_stats["valid_goal"], 1, 1),
@@ -75,8 +71,7 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return abs(new_stats["crossroads"] - self._desired_crossroads) <= self._threshold
-        #return new_stats["crossroads"] >= self._desired_crossroads
+        return abs(new_stats["crossroads"] - self._desired_crossroads) <= self._threshold 
 
     def get_debug_info(self, new_stats, old_stats):
         return {
