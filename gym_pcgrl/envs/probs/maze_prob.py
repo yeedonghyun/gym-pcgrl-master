@@ -16,7 +16,7 @@ class MazeProblem(Problem):
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
-        self._desired_crossroads = 25
+        self._desired_crossroads = 15
         self._threshold = 1
 
         self._rewards = {
@@ -27,7 +27,7 @@ class MazeProblem(Problem):
             "regions": 5
         }
 
-        self.dir = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
+        self._dirs = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
 
         self.n_action = 0
 
@@ -39,26 +39,30 @@ class MazeProblem(Problem):
         self.n_action += 1
 
         map_stats = {
-            "crossroads": 0,
+            "crossroads": np.inf,
             "players": calc_certain_tile(map_locations, ["player"]),
             "goals": calc_certain_tile(map_locations, ["goal"]),
             "valid_goal": False,
             "regions": calc_num_regions(map, map_locations, ["empty", "player", "goal"]),
         }
-        if map_stats["players"] != 1 or map_stats["goals"] != 1 or map_stats["regions"] != 1 :
+        if map_stats["players"] == 0 or map_stats["goals"] == 0 or map_stats["regions"] != 1 :
             return map_stats
-
-        map_stats["valid_goal"] = self.__is_valid_goal(map, map_locations)
+        
+        for goal in map_locations["goal"] :
+            map_stats["valid_goal"] = max(self.__is_valid_goal(map, goal), False)
+        
         if not map_stats["valid_goal"] :
             return map_stats
 
-        map_stats["crossroads"] = self.__a_star(map, map_locations)
+        for player in map_locations["player"] :
+            map_stats["crossroads"] = min(self.__a_star(map, player), map_stats["crossroads"])
 
         return map_stats
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads - self._threshold, self._desired_crossroads + self._threshold),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
+            #"crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_crossroads - self._threshold, self._desired_crossroads + self._threshold),
             "players": get_range_reward(new_stats["players"], old_stats["players"], 1, 1),
             "goals": get_range_reward(new_stats["goals"], old_stats["goals"], 1, 1),
             "valid_goal" : get_range_reward(new_stats["valid_goal"], old_stats["valid_goal"], 1, 1),
@@ -71,7 +75,8 @@ class MazeProblem(Problem):
             rewards["regions"] * self._rewards["regions"]
             
     def get_episode_over(self, new_stats, old_stats):
-        return abs(new_stats["crossroads"] - self._desired_crossroads) <= self._threshold or (self.n_action + 1) % 1000 == 0
+        return abs(new_stats["crossroads"] - self._desired_crossroads) <= self._threshold
+        #return new_stats["crossroads"] >= self._desired_crossroads
 
     def get_debug_info(self, new_stats, old_stats):
         return {
@@ -82,19 +87,17 @@ class MazeProblem(Problem):
             "regions": new_stats["regions"]
         }
 
-    def __is_valid_goal(self, map, map_locations):
-        goal = map_locations["goal"][0]
-
+    def __is_valid_goal(self, map, goal):
         if goal[0] == 0 or goal[0] == self._width - 1 or goal[1] == 0 or goal[1] == self._height - 1:
             return True
 
-        for dir in self.dir :
+        for dir in self._dirs :
             if map[goal[1] + dir[1]][goal[0] + dir[0]] == "solid" :
                 return True 
         
         return False
     
-    def __a_star(self, map, map_locations):
+    def __a_star(self, map, start):
         def out_of_range(pos):
             if pos[0] < 0 or pos[0] >= self._width or pos[1] < 0 or pos[1] >= self._height:
                 return True
@@ -104,7 +107,7 @@ class MazeProblem(Problem):
         def count_valid_directions(pos):
             np_pos = np.array(copy.deepcopy(pos))
             num_of_movable_dir = 0
-            for dir in self.dir:
+            for dir in self._dirs:
                 new_pos = np.array(np_pos + dir)
                 if not out_of_range(new_pos) and map[new_pos[1]][new_pos[0]] == "empty" :
                     num_of_movable_dir += 1
@@ -118,7 +121,7 @@ class MazeProblem(Problem):
 
             return tuple(np_pos)
             
-        start = tuple(map_locations["player"][0])
+        start = tuple(start)
         visited = set()
         visited.add(start)
         priority_queue = [(0, start)]
@@ -128,7 +131,7 @@ class MazeProblem(Problem):
             prev_cost, prev_pos = heapq.heappop(priority_queue)
             cur_cost = count_valid_directions(prev_pos) - 1
 
-            for direction in self.dir:
+            for direction in self._dirs:
                 new_pos = move_pos(prev_pos, direction)
                 new_cost = prev_cost + cur_cost
 
@@ -142,4 +145,4 @@ class MazeProblem(Problem):
                     heapq.heappush(priority_queue, (new_cost, new_pos))
                     visited.add(new_pos)
 
-        return False
+        return np.inf
