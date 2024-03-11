@@ -1,9 +1,5 @@
 import gym
-import gym_pcgrl
-
 import numpy as np
-import math
-import os
 
 # clean the input action
 get_action = lambda a: a.item() if hasattr(a, "item") else a

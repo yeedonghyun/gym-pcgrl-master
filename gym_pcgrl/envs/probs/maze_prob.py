@@ -39,7 +39,7 @@ class MazeProblem(Problem):
         self.n_action += 1
 
         map_stats = {
-            "crossroads": np.inf,
+            "crossroads": self._width * self._height,
             "players": calc_certain_tile(map_locations, ["player"]),
             "goals": calc_certain_tile(map_locations, ["goal"]),
             "valid_goal": False,
@@ -145,4 +145,4 @@ class MazeProblem(Problem):
                     heapq.heappush(priority_queue, (new_cost, new_pos))
                     visited.add(new_pos)
 
-        return np.inf
+        return self._width * self._height,
