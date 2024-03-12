@@ -11,12 +11,12 @@ from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 10
-        self._height = 10
+        self._width = 11
+        self._height = 7
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
-        self._desired_crossroads = 15
+        self._desired_crossroads = 25
         self._threshold = 1
 
         self._rewards = {
@@ -52,7 +52,8 @@ class MazeProblem(Problem):
             return map_stats
 
         for player in map_locations["player"] :
-            map_stats["crossroads"] = min(self.__a_star(map, player), map_stats["crossroads"])
+            crossroad = self.__a_star(map, player)
+            map_stats["crossroads"] = min(crossroad, map_stats["crossroads"])
 
         return map_stats
     
@@ -104,7 +105,7 @@ class MazeProblem(Problem):
             num_of_movable_dir = 0
             for dir in self._dirs:
                 new_pos = np.array(np_pos + dir)
-                if not out_of_range(new_pos) and map[new_pos[1]][new_pos[0]] == "empty" :
+                if not out_of_range(new_pos) and map[new_pos[1]][new_pos[0]] != "solid" :
                     num_of_movable_dir += 1
 
             return num_of_movable_dir
@@ -140,4 +141,4 @@ class MazeProblem(Problem):
                     heapq.heappush(priority_queue, (new_cost, new_pos))
                     visited.add(new_pos)
 
-        return self._width * self._height,
+        return self._width * self._height
