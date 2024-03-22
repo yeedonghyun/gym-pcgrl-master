@@ -7,23 +7,29 @@ def inference(game, representation, **kwargs):
     env = make_vec_envs(env_name, representation, None, 1, **kwargs)
     model_path = 'models/{}/{}/model.pkl'.format(game, representation)
     model = PPO2.load(model_path)
-    
-    for i in range(kwargs.get('trials', 1)):
+
+    cnt = 0
+    for _ in range(kwargs.get('trials', 1)):
         obs = env.reset()
-        for _ in range(1000) :
+        while True:
             action, _ = model.predict(obs)
             obs, _, dones, info = env.step(action)
-
-            if dones:        
-                path = 'image/{}/'.format(game) + str(i) + '_' + str(info[0]['swap_potential'])
-                save_image(info[0]['terminal_observation'], path)
+            
+            if dones:
+                path = 'image/{}/'.format(game) + str(cnt) + '_' + str(info[0]['crossroads'])
+                if info[0]['crossroads'] == 77:
+                #if info[0]['swap_potential'] == 0:
+                    continue
+                
+                save_image(info, path)
+                cnt += 1
                 break
 
 ################################## MAIN ########################################
-game = 'match3'
+game = 'maze'
 representation = 'wide'
 kwargs = {
-    'trials': 5,
+    'trials': 100,
     'verbose': False,
     'render': False
 }

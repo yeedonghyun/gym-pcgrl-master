@@ -32,7 +32,7 @@ def main(game, representation, experiment, steps, n_cpu, **kwargs):
 game = 'maze'
 representation = 'wide'
 experiment = None
-steps = 35000000
+steps = 70000000
 n_cpu = 20
 kwargs = {
     'render': False,

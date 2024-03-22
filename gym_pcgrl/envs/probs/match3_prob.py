@@ -1,5 +1,7 @@
+import numpy as np
+
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_range_reward
+from gym_pcgrl.envs.helper import get_limit_reward
 
 class Match3Problem(Problem):
     class Pos():
@@ -14,8 +16,9 @@ class Match3Problem(Problem):
         self._prob = {"empty": 0.5, "solid":0.5}
         self._border_tile = "solid"
 
-        self._desired_swap_potential = 400
-        self._threshold = 10
+        #swap_potential
+        self._desired_difficulty = 500
+        self._threshold = 5
 
         self._vector = [[self.Pos(-1, 0), self.Pos(-2, 0)], [self.Pos(-1, 0), self.Pos(1, 0)], [self.Pos(1, 0), self.Pos(2, 0)], 
                     [self.Pos(0, -1), self.Pos(0, -2)], [self.Pos(0, -1), self.Pos(0, 1)], [self.Pos(0, 1), self.Pos(0, 2)]]
@@ -61,12 +64,12 @@ class Match3Problem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "swap_potential": get_range_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_swap_potential - self._threshold, self._desired_swap_potential + self._threshold),
+            "swap_potential": get_limit_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._threshold),
         }
         return rewards["swap_potential"] * self._rewards["swap_potential"]
 
     def get_episode_over(self, new_stats, old_stats):
-        return abs(new_stats["swap_potential"] - self._desired_swap_potential) <= self._threshold
+        return abs(new_stats["swap_potential"] - self._desired_difficulty) <= self._threshold
 
     def get_debug_info(self, new_stats, old_stats):
         return {

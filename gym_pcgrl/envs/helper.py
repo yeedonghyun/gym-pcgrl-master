@@ -377,23 +377,27 @@ def get_range_reward(new_value, old_value, low, high):
     if new_value < low and old_value > high:
         return high - old_value + low - new_value
 
-def save_image(obs, output_path):
+def save_image(info, path):
+    obs = info[0]['terminal_observation']
     map = []
     for o in obs :
         line = []
         for b in o :
-            if int(b[0]) == 1:
-                line.append(to_rgba(np.array([1, 1, 1])))
-            elif int(b[1]) == 1:
+            if int(b[1]) == 1:
                 line.append(to_rgba(np.array([0, 0, 0])))
-            elif int(b[2]) == 1:
-                line.append(to_rgba(np.array([0, 1, 0])))
-            else :
-                line.append(to_rgba(np.array([1, 0, 0])))
+            else:
+                line.append(to_rgba(np.array([1, 1, 1])))
                 
         map.append(line)
-
     plt.imshow(map, cmap='viridis') 
     plt.axis('off')  
-    plt.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+    plt.savefig(path, bbox_inches='tight', pad_inches=0, transparent=True)
     plt.close()
+
+def get_limit_reward(new, old, threshold):
+    distance = new - old
+    if distance <= threshold * 2 + 1:
+        return distance
+
+    else :
+        return threshold * 2 + 1 - distance 
