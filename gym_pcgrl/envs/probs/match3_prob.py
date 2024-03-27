@@ -1,7 +1,7 @@
 import numpy as np
 
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_limit_reward
+from gym_pcgrl.envs.helper import get_limit_reward, get_limit_reward
 
 class Match3Problem(Problem):
     class Pos():
@@ -64,7 +64,8 @@ class Match3Problem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "swap_potential": get_limit_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._threshold),
+            #"swap_potential": get_limit_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._threshold),
+            "swap_potential": get_limit_reward(new_stats["swap_potential"], old_stats["swap_potential"], self._desired_difficulty - self._threshold,  self._desired_difficulty + self._threshold),
         }
         return rewards["swap_potential"] * self._rewards["swap_potential"]
 

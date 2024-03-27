@@ -3,7 +3,7 @@ import numpy as np
 import heapq
 
 from gym_pcgrl.envs.probs.problem import Problem
-from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num_regions, get_limit_reward
+from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num_regions, get_limit_reward, get_limit_reward
 
 #player[0] == width
 #player[1] == height
@@ -11,19 +11,19 @@ from gym_pcgrl.envs.helper import get_range_reward, get_tile_locations, calc_num
 class MazeProblem(Problem):
     def __init__(self):
         super().__init__()
-        self._width = 11
-        self._height = 7
+        self._width = 10
+        self._height = 10
         self._prob = {"empty": 0.6, "solid":0.38, "player":0.01, "goal":0.01}
         self._border_tile = "solid"
 
         #crossroads
-        self._desired_difficulty = 5
+        self._desired_difficulty = 20
         self._threshold = 1
 
         self._rewards = {
             "crossroads": 1,
-            "valid_goal" : 1,
-            "regions": 1
+            "valid_goal" : 3,
+            "regions": 3
         }
 
         self._dirs = [np.array([0, 1]), np.array([0, -1]), np.array([1, 0]), np.array([-1, 0])]
@@ -70,7 +70,9 @@ class MazeProblem(Problem):
     
     def get_reward(self, new_stats, old_stats):
         rewards = {
-            "crossroads": get_limit_reward(new_stats["crossroads"], old_stats["crossroads"], self._threshold),
+            #"crossroads": get_limit_reward(new_stats["crossroads"], old_stats["crossroads"], self._threshold),
+            #"crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], self._desired_difficulty - self._threshold, self._desired_difficulty - self._threshold),
+            "crossroads": get_range_reward(new_stats["crossroads"], old_stats["crossroads"], np.inf, np.inf),
             "valid_goal" : get_range_reward(new_stats["valid_goal"], old_stats["valid_goal"], 1, 1),
             "regions": get_range_reward(new_stats["regions"], old_stats["regions"], 1, 1),
         }

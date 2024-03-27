@@ -19,9 +19,7 @@ def main(game, representation, experiment, steps, n_cpu, **kwargs):
     policy = FullyConvPolicyBigMap
     model = PPO2(policy, env, verbose=1, tensorboard_log="./runs")
     model.learn(total_timesteps=int(steps), tb_log_name=exp_name)
-    
-    model_dir = 'models/{}/{}/'.format(game, representation)
-    model.save(model_dir + 'model.pkl')
+    model.save('models/{}/'.format(game) + 'model.pkl')
 
     end_time = datetime.now().replace()
     print("Start time  : ", start_time)
@@ -29,11 +27,11 @@ def main(game, representation, experiment, steps, n_cpu, **kwargs):
     print("Total training time  : ", end_time - start_time)
 
 ################################## MAIN ########################################
-game = 'maze'
+game = 'match3'
 representation = 'wide'
 experiment = None
-steps = 70000000
-n_cpu = 20
+steps = 30000000
+n_cpu = 10
 kwargs = {
     'render': False,
     'render_rank': 0

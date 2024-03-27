@@ -389,6 +389,13 @@ def save_image(info, path):
                 line.append(to_rgba(np.array([1, 1, 1])))
                 
         map.append(line)
+        
+    if len(info[0]) == 5:
+        plyer = info[0]['players']
+        goal = info[0]['goals']
+        map[goal[1]][goal[0]] = to_rgba(np.array([1, 0, 0]))
+        map[plyer[1]][plyer[0]] = to_rgba(np.array([0, 1, 0]))
+
     plt.imshow(map, cmap='viridis') 
     plt.axis('off')  
     plt.savefig(path, bbox_inches='tight', pad_inches=0, transparent=True)
